@@ -30,6 +30,12 @@ from lab8.db import connect
 from lab8.durability import InjectedCrash, issue_refund
 from lab8.mock_llm import complete
 from lab8.runtime import run_react
+import time
+
+from lab8.db import connect
+from lab8.durability import issue_refund
+from lab8.mock_llm import complete
+from lab8.runtime import ToolRejected, run_react
 from lab8.schemas import Budget, RunResult, make_run_id
 from lab8.shapes.common import finish
 from lab8.tools import get_claim_view, tool_cost
