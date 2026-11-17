@@ -2,17 +2,20 @@
 
 ## Thông tin nhóm
 
-- Tên nhóm:
-- Lớp: L3A
-- Repo nhóm: `K5-L3A-DAY08-TenNhom-FromWorkflowsToAgents` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt:
+- Tên nhóm: MV
+- Lớp: L3B
+- Repo nhóm: `K5-L3B-DAY08-MV-FromWorkflowsToAgents`
+- URL repo: https://github.com/PH31M/K5-L3B-DAY08-MV-FromWorkflowsToAgents
+- Nhánh nộp: `main` (feature gộp qua PR từ `feat/shapes`)
+- Commit chốt: cập nhật sau khi merge (xem `report/team/decision_adr.md`)
 
 ## Thành viên
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 |   Phạm Hoàng Đức Minh     |   2A202604114   |   ducminh03102005@gmail.com    |   PH31M     |    Nhóm Trưởng     |
-|   2 |    Trần Đình Nhật Minh    |   2A202604083   |       |        |    Thành Viên     |
+|   1 | Phạm Hoàng Đức Minh | 2A202604114 | ducminh03102005@gmail.com | PH31M | Nhóm trưởng — shape A `workflow.py`, merge PR, số liệu ADR |
+|   2 | Trần Đình Nhật Minh | 2A202604083 |  | (điền handle) | Shape B `single.py` (ReAct ≤ 8 bước), test step-cap/budget |
+|   3 | Nguyễn Văn Minh | 2A202604117 |  | vm140205-collab | Shape C `orchestrator.py` + handoff, benchmark/crash, báo cáo nhóm |
 
 Gợi ý chia vai:
 
@@ -25,7 +28,11 @@ Gợi ý chia vai:
 
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
-| | | | |
+| Phạm Hoàng Đức Minh (2A202604114) | Shape A `workflow.py`, review + merge PR, điền `decision_adr.md` | `feat/shapes`: workflow.py | `tests/test_workflow_extra.py` |
+| Trần Đình Nhật Minh (2A202604083) | Shape B `single.py`, kiểm step cap 8 và budget model calls | `feat/shapes`: single.py | `tests/test_single_extra.py` |
+| Nguyễn Văn Minh (2A202604117) | Shape C `orchestrator.py` + handoff allowlist, `reports/benchmark.json` + `reports/crash.json`, `group_report.md` | `feat/shapes`: orchestrator.py | `tests/test_handoff_extra.py` |
+
+Ghi chú: mỗi thành viên tự commit phần test + mục báo cáo của mình bằng tài khoản GitHub của mình trên nhánh riêng, rồi mở PR vào `feat/shapes`. Cột Commit/Test ở trên là phần việc đã nhận; cập nhật hash thật khi PR được merge.
 
 ## Cá nhân
 
