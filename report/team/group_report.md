@@ -6,7 +6,7 @@ Tối đa 5 trang ngoài phụ lục. Số liệu lấy từ file trong `src/rep
 
 - Tên nhóm: MV
 - Thành viên: 3 người, xem `TEAM.md` (Phạm Hoàng Đức Minh — shape A; Trần Đình Nhật Minh — shape B; Nguyễn Văn Minh — shape C + benchmark)
-- Commit chốt (trùng `report/team/decision_adr.md`): `53c7724`
+- Commit chốt (trùng `report/team/decision_adr.md`): `1864b2b`
 - Shape chọn: `workflow`
 
 ## 2. Mục tiêu và cách tiếp cận
