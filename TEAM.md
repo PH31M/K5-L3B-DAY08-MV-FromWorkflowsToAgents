@@ -11,8 +11,8 @@
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 |        |      |       |        |         |
-|   2 |        |      |       |        |         |
+|   1 |   Phạm Hoàng Đức Minh     |   2A202604114   |   ducminh03102005@gmail.com    |   PH31M     |    Nhóm Trưởng     |
+|   2 |    Trần Đình Nhật Minh    |   2A202604083   |       |        |    Thành Viên     |
 
 Gợi ý chia vai:
 
