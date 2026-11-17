@@ -1,0 +1,245 @@
+{
+  "topic": "B7",
+  "command": "python -m bonus.grader_audit_report",
+  "relations": [
+    {
+      "relation": "delay_days_2_vs_3",
+      "goes_through": "lab8.compensation.quote",
+      "a": {
+        "delay_days": 2,
+        "amount_vnd": 0,
+        "reason": "no_entitlement"
+      },
+      "b": {
+        "delay_days": 3,
+        "amount_vnd": 35000,
+        "reason": "entitled"
+      },
+      "holds": true
+    },
+    {
+      "relation": "infra_errors_do_not_move_pass_rate",
+      "builds": [
+        {
+          "build": "a",
+          "shape": "workflow",
+          "graded_trials": {
+            "a": 12,
+            "b": 12
+          },
+          "moved": {},
+          "holds": true
+        },
+        {
+          "build": "b",
+          "shape": "workflow",
+          "graded_trials": {
+            "a": 12,
+            "b": 12
+          },
+          "moved": {},
+          "holds": true
+        },
+        {
+          "build": "c",
+          "shape": "workflow",
+          "graded_trials": {
+            "a": 12,
+            "b": 16
+          },
+          "moved": {
+            "pass_rate": {
+              "a": 0.75,
+              "b": 0.5625
+            },
+            "seed_pass_rates": {
+              "a": {
+                "11": 0.8333333333333334,
+                "22": 0.6666666666666666
+              },
+              "b": {
+                "11": 0.625,
+                "22": 0.5
+              }
+            },
+            "cost_per_success_vnd": {
+              "a": 21.055555555555557,
+              "b": 23.72222222222222
+            },
+            "mean_steps": {
+              "a": 4.25,
+              "b": 3.4375
+            }
+          },
+          "holds": false
+        }
+      ]
+    },
+    {
+      "relation": "duplicated_list_keeps_rates_doubles_totals",
+      "builds": [
+        {
+          "build": "a",
+          "shape": "workflow",
+          "moved": {
+            "cost_per_success_vnd": {
+              "a": 31.5,
+              "b": 26.27777777777778
+            }
+          },
+          "totals": {
+            "trials": {
+              "a": 12,
+              "b": 24
+            },
+            "graded_trials": {
+              "a": 12,
+              "b": 24
+            },
+            "successes": {
+              "a": 9,
+              "b": 18
+            },
+            "total_simulated_cost_vnd": {
+              "a": 283.5,
+              "b": 473.0
+            }
+          },
+          "holds": false
+        },
+        {
+          "build": "b",
+          "shape": "workflow",
+          "moved": {},
+          "totals": {
+            "trials": {
+              "a": 12,
+              "b": 24
+            },
+            "graded_trials": {
+              "a": 12,
+              "b": 24
+            },
+            "successes": {
+              "a": 9,
+              "b": 18
+            },
+            "total_simulated_cost_vnd": {
+              "a": 189.5,
+              "b": 379.0
+            }
+          },
+          "holds": true
+        },
+        {
+          "build": "c",
+          "shape": "workflow",
+          "moved": {},
+          "totals": {
+            "trials": {
+              "a": 12,
+              "b": 24
+            },
+            "graded_trials": {
+              "a": 12,
+              "b": 24
+            },
+            "successes": {
+              "a": 9,
+              "b": 18
+            },
+            "total_simulated_cost_vnd": {
+              "a": 189.5,
+              "b": 379.0
+            }
+          },
+          "holds": true
+        }
+      ]
+    },
+    {
+      "relation": "pass_5_invariant_under_duplication (README claim)",
+      "builds": [
+        {
+          "build": "a",
+          "pass_5": {
+            "a": 0.6666666666666666,
+            "b": 0.0
+          },
+          "holds": false
+        },
+        {
+          "build": "b",
+          "pass_5": {
+            "a": 0.6666666666666666,
+            "b": 0.0
+          },
+          "holds": false
+        },
+        {
+          "build": "c",
+          "pass_5": {
+            "a": 0.6666666666666666,
+            "b": 0.0
+          },
+          "holds": false
+        }
+      ]
+    },
+    {
+      "relation": "single_trial_reports_its_own_cost",
+      "builds": [
+        {
+          "build": "a",
+          "cost_per_success_vnd": 24.0,
+          "total_simulated_cost_vnd": 24.0,
+          "mean_steps": 3.0,
+          "holds": false
+        },
+        {
+          "build": "b",
+          "cost_per_success_vnd": 12.0,
+          "total_simulated_cost_vnd": 12.0,
+          "mean_steps": 3.0,
+          "holds": true
+        },
+        {
+          "build": "c",
+          "cost_per_success_vnd": 12.0,
+          "total_simulated_cost_vnd": 12.0,
+          "mean_steps": 3.0,
+          "holds": true
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "a": {
+      "checks": {
+        "infra_errors_do_not_move_pass_rate": true,
+        "duplicated_list_keeps_rates_doubles_totals": false,
+        "single_trial_reports_its_own_cost": false
+      },
+      "consistent": false
+    },
+    "b": {
+      "checks": {
+        "infra_errors_do_not_move_pass_rate": true,
+        "duplicated_list_keeps_rates_doubles_totals": true,
+        "single_trial_reports_its_own_cost": true
+      },
+      "consistent": true
+    },
+    "c": {
+      "checks": {
+        "infra_errors_do_not_move_pass_rate": false,
+        "duplicated_list_keeps_rates_doubles_totals": true,
+        "single_trial_reports_its_own_cost": true
+      },
+      "consistent": false
+    }
+  },
+  "consistent_builds": [
+    "b"
+  ]
+}
