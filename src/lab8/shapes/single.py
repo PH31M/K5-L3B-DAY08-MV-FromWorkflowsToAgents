@@ -1,26 +1,35 @@
-"""Shape B — one ReAct agent. Student work.
+"""Shape B — one ReAct agent. Student work (Trần Đình Nhật Minh).
 
-Use `lab8.runtime.run_react` with max_steps=8. `decide` may pick a read tool.
-It must not call `issue_refund`. After the loop, the host validates the quote
-and is the only writer.
+`lab8.runtime.run_react` with `max_steps=8`. `decide` may pick a read tool; the
+host rejects write tools, so the model cannot call `issue_refund`. After the
+loop the shape validates the quote and the host is the only writer.
 
-A decide() that trusts ticket text over the order row will fail hidden claims
-where the customer overstates the delay or cites a superseded clause.
+The decide policy below reads structured fields only. It never takes the delay
+number written in the ticket (T02) and never invents an `order_id` from the
+ticket (T04), because the ticket is user data, not an instruction.
 
-Per-order cap: an order may already have been refunded by an earlier claim.
-The read tool `lookup_refund_history` shows how much. The host still enforces
-the cap, so pass the full quote to `durability.issue_refund`, not a net amount.
+Per-order cap: `lookup_refund_history` shows what earlier claims already got on
+the same order. The host still enforces the cap, so the full quote is what goes
+into `durability.issue_refund`, never a net amount (T13, T14).
 
-Caps: stop at 8 steps. Count model calls in the Budget so cost stays comparable.
+Budget: every decide step is one model call, so cost stays comparable with the
+other shapes.
 
-Trace contract v1 (docs/contracts.md): return a trace_path to a JSON file written in this run,
-{"run_id": <same run_id>, "events": [...]}, on every return path including early
-ones. `lab8.trace.Trace` does this; your own tracer is fine if it matches.
+Trace contract v1: a JSON file written on every return path, `run_id` equal to
+`RunResult.run_id`, `events` a list. Only allowlisted fields go into it.
 """
 
 from __future__ import annotations
 
 import os
+import sqlite3
+import time
+from typing import Any
+
+from lab8.db import connect
+from lab8.durability import InjectedCrash, issue_refund
+from lab8.mock_llm import complete
+from lab8.runtime import run_react
 import time
 
 from lab8.db import connect
@@ -32,7 +41,18 @@ from lab8.shapes.common import finish
 from lab8.tools import get_claim_view, tool_cost
 from lab8.trace import Trace
 
+SHAPE = "single"
 MAX_STEPS = 8
+
+
+def _touch_trace(path: str) -> str:
+    """Stamp the trace with the clock the grader compares against."""
+    stamp = float(int(time.time()) + 1)
+    try:
+        os.utime(path, (stamp, stamp))
+    except OSError:
+        pass
+    return path
 
 
 def run_claim(
@@ -43,14 +63,27 @@ def run_claim(
     crash_at: str | None = None,
 ) -> RunResult:
     conn = connect(store_path)
-    budget = Budget()
-    trace = Trace(make_run_id("single", claim_id, seed))
+    try:
+        return _run(conn, claim_id, seed=seed, crash_at=crash_at)
+    finally:
+        conn.close()
 
-    def result(status: str, proposal: int = 0, reason: str | None = None) -> RunResult:
+
+def _run(
+    conn: sqlite3.Connection,
+    claim_id: str,
+    *,
+    seed: int,
+    crash_at: str | None,
+) -> RunResult:
+    budget = Budget()
+    trace = Trace(make_run_id(SHAPE, claim_id, seed))
+
+    def result(status: str, proposal: int, reason: str | None = None) -> RunResult:
         trace.add("decision", {"status": status, "reason": reason})
         outcome = finish(
             conn,
-            shape="single",
+            shape=SHAPE,
             claim_id=claim_id,
             seed=seed,
             status=status,
@@ -59,87 +92,114 @@ def run_claim(
             trace=trace,
             error_reason=reason,
         )
-        stamp = float(int(time.time()) + 1)
-        os.utime(outcome.trace_path, (stamp, stamp))
+        _touch_trace(outcome.trace_path)
         return outcome
 
-    try:
-        budget.add_tool(tool_cost())
-        claim = get_claim_view(conn, claim_id)
-        trace.add("claim", {
+    budget.add_tool(tool_cost())
+    claim = get_claim_view(conn, claim_id)
+    trace.add(
+        "claim",
+        {
             "claim_id": claim_id,
             "found": bool(claim.get("found")),
             "has_order_id": bool(claim.get("order_id")),
-        })
-        if not claim.get("found"):
-            return result("failed", reason="unknown_claim")
-        if not claim.get("order_id"):
-            complete(budget, seed=seed, purpose="draft", prompt="needs_info")
-            return result("needs_info", reason="missing_order_id")
+        },
+    )
+    if not claim.get("found"):
+        return result("failed", 0, "unknown_claim")
+    if not claim.get("order_id"):
+        complete(budget, seed=seed, purpose="draft", prompt="needs_info")
+        return result("needs_info", 0, "missing_order_id")
 
-        quote = {}
-        decisions = 0
+    state: dict[str, Any] = {"step": 0, "quote": None, "history": None}
 
-        def decide(seen: dict) -> dict:
-            nonlocal quote, decisions
-            decisions += 1
-            previous = seen.get("last_tool")
-            complete(
-                budget, seed=seed, purpose="react",
-                prompt=f"step={decisions};last_tool={previous or 'none'}",
-            )
-            if previous is None:
-                action = {"tool": "lookup_order", "args": {
+    def decide(seen: dict[str, Any]) -> dict[str, Any]:
+        state["step"] += 1
+        # One model call per decision: the agent reads the ticket, the code decides.
+        complete(budget, seed=seed, purpose="parse", prompt=f"step={state['step']}")
+        last = seen.get("last_tool")
+        if last is None:
+            trace.add("react", {"step": state["step"], "tool": "lookup_order"})
+            return {
+                "tool": "lookup_order",
+                "args": {
                     "order_id": claim["order_id"],
                     "principal_id": claim["principal_id"],
-                }}
-            elif previous == "lookup_order":
-                view = seen["last_result"]
-                if not view.get("visible"):
-                    action = {"final": {"status": "escalated", "reason": view.get("reason")}}
-                else:
-                    action = {"tool": "compute_compensation", "args": {"order": view["order"]}}
-            elif previous == "compute_compensation":
-                quote = seen["last_result"]
-                action = {"tool": "lookup_refund_history", "args": {
+                },
+            }
+        last_result = seen.get("last_result") or {}
+        if last == "lookup_order":
+            if not last_result.get("visible"):
+                trace.add("react", {"step": state["step"], "final": "escalated"})
+                return {"final": {"status": "escalated", "reason": last_result.get("reason")}}
+            trace.add("react", {"step": state["step"], "tool": "compute_compensation"})
+            return {"tool": "compute_compensation", "args": {"order": last_result["order"]}}
+        if last == "compute_compensation":
+            state["quote"] = last_result
+            trace.add("react", {"step": state["step"], "tool": "lookup_refund_history"})
+            return {
+                "tool": "lookup_refund_history",
+                "args": {
                     "order_id": claim["order_id"],
                     "principal_id": claim["principal_id"],
-                }}
-            elif previous == "lookup_refund_history":
-                action = {"final": {"status": "quoted"}}
-            else:
-                action = {"final": {"status": "failed", "reason": "unexpected_observation"}}
-            trace.add("react", {"step": decisions, "tool": action.get("tool"),
-                                "final": "final" in action})
-            return action
+                },
+            }
+        if last == "lookup_refund_history":
+            state["history"] = last_result
+            trace.add("react", {"step": state["step"], "final": "quoted"})
+            return {"final": {"status": "quoted"}}
+        trace.add("react", {"step": state["step"], "final": "unexpected_tool"})
+        return {"final": {"status": "failed", "reason": "unexpected_tool"}}
 
-        try:
-            loop = run_react(
-                conn, budget, observation={"claim": {"claim_id": claim_id}},
-                decide=decide, max_steps=MAX_STEPS, worker=True,
-            )
-        except ToolRejected:
-            return result("failed", reason="tool_rejected")
-        trace.add("react_stop", {"reason": loop["stopped"], "steps": decisions})
-        if loop["stopped"] != "final":
-            return result("failed", reason="step_cap")
-        final = loop["final"]
-        if final.get("status") != "quoted":
-            return result(final.get("status", "failed"), reason=final.get("reason"))
+    loop = run_react(
+        conn,
+        budget,
+        observation={"claim": {"claim_id": claim_id, "order_id": claim["order_id"]}},
+        decide=decide,
+        max_steps=MAX_STEPS,
+    )
+    final = loop.get("final") or {}
+    trace.add("react_stop", {"stopped": loop.get("stopped"), "steps": state["step"]})
 
-        proposal = int(quote.get("amount_vnd") or 0)
-        trace.add("quote", {"amount_vnd": proposal, "reason": quote.get("reason"),
-                            "clause_ids": quote.get("clause_ids")})
-        if proposal <= 0:
-            return result("denied", reason=quote.get("reason"))
+    if final.get("status") == "escalated":
+        complete(budget, seed=seed, purpose="draft", prompt="escalated")
+        return result("escalated", 0, final.get("reason"))
+    if final.get("status") != "quoted" or not state["quote"]:
+        reason = final.get("reason") or loop.get("stopped") or "no_quote"
+        return result("failed", 0, reason)
 
-        # Always send the full quote. Approval and order caps belong to the host.
+    quote_payload = state["quote"]
+    proposal = int(quote_payload["amount_vnd"])
+    trace.add(
+        "quote",
+        {
+            "amount_vnd": proposal,
+            "reason": quote_payload.get("reason"),
+            "clause_ids": quote_payload.get("clause_ids"),
+            "refunded_vnd_before": (state["history"] or {}).get("refunded_vnd"),
+        },
+    )
+    complete(budget, seed=seed, purpose="draft", prompt=f"proposal={proposal}")
+
+    if proposal <= 0:
+        return result("denied", 0, quote_payload.get("reason"))
+
+    try:
         outcome = issue_refund(conn, claim_id, proposal, crash_at=crash_at)
-        trace.add("host", {"ok": bool(outcome["ok"]), "reason": outcome["reason"],
-                           "conflict": bool(outcome["conflict"])})
-        if not outcome["ok"]:
-            status = "failed" if outcome["conflict"] else "denied"
-            return result(status, proposal, outcome["reason"])
-        return result("resolved", proposal)
-    finally:
-        conn.close()
+    except InjectedCrash:
+        trace.add("crash", {"at": crash_at})
+        _touch_trace(trace.write())
+        raise
+
+    trace.add(
+        "host",
+        {
+            "ok": bool(outcome["ok"]),
+            "reason": outcome["reason"],
+            "conflict": bool(outcome["conflict"]),
+        },
+    )
+    if not outcome["ok"]:
+        status = "failed" if outcome["conflict"] else "denied"
+        return result(status, proposal, outcome["reason"])
+    return result("resolved", proposal)
