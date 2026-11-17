@@ -6,7 +6,7 @@ Tối đa 5 trang ngoài phụ lục. Số liệu lấy từ file trong `src/rep
 
 - Tên nhóm: MV
 - Thành viên: 3 người, xem `TEAM.md` (Phạm Hoàng Đức Minh — shape A; Trần Đình Nhật Minh — shape B; Nguyễn Văn Minh — shape C + benchmark)
-- Commit chốt (trùng `report/team/decision_adr.md`): `1864b2b`
+- Commit chốt (trùng `report/team/decision_adr.md`): `fe4b2b2`
 - Shape chọn: `workflow`
 
 ## 2. Mục tiêu và cách tiếp cận
@@ -42,7 +42,7 @@ Từ `src/reports/benchmark.json` — 4 shape × 14 claim public × seed `11,22,
 | Shape | Pass | Pass^5 | Seed min–max | Variance | Cost/success (VND) | Mean / p95 steps |
 |---|---:|---:|---|---:|---:|---|
 | **workflow** | **1.000** | **1.000** | 1.000–1.000 | **0.000000** | **28.79** | 4.43 / 5 |
-| single | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 38.58 | 8.00 / 9 |
+| single | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 38.17 | 8.00 / 9 |
 | orchestrator | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 57.33 | 5.36 / 6 |
 | swarm | 0.986 | 0.929 | 0.929–1.000 | 0.000816 | 49.57 | 2.80 / 3 |
 

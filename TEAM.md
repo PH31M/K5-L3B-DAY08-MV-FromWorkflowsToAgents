@@ -7,7 +7,7 @@
 - Repo nhóm: `K5-L3B-DAY08-MV-FromWorkflowsToAgents`
 - URL repo: https://github.com/PH31M/K5-L3B-DAY08-MV-FromWorkflowsToAgents
 - Nhánh nộp: `main` (feature gộp qua PR từ nhánh thành viên)
-- Commit chốt: `1864b2b` (xem `report/team/decision_adr.md`)
+- Commit chốt: `fe4b2b2` (xem `report/team/decision_adr.md`)
 
 ## Thành viên
 
