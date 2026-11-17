@@ -7,7 +7,7 @@
 - Repo nhóm: `K5-L3B-DAY08-MV-FromWorkflowsToAgents`
 - URL repo: https://github.com/PH31M/K5-L3B-DAY08-MV-FromWorkflowsToAgents
 - Nhánh nộp: `main` (feature gộp qua PR từ nhánh thành viên)
-- Commit chốt: `fe4b2b2` (xem `report/team/decision_adr.md`)
+- Commit chốt: `96a395c` (xem `report/team/decision_adr.md`)
 
 ## Thành viên
 
@@ -17,26 +17,21 @@
 |   2 | Trần Đình Nhật Minh | 2A202604083 | trandinhnhatminh1112@gmail.com | trandinhnhatminh1452 | Shape B `single.py` (ReAct ≤ 8 bước), test step-cap/budget |
 |   3 | Nguyễn Văn Minh | 2A202604117 | vm140205@gmail.com | vm140205-collab | Shape C `orchestrator.py` + handoff, benchmark/crash, group report |
 
-Gợi ý chia vai:
-
-- Nhóm 6 người: integration; workflow; single agent; orchestrator; ledger/policy/crash; eval/report.
-- Nhóm 4 người: workflow + integration; single; orchestrator + handoff; ledger + evaluation.
-
 ## Bảng đóng góp
 
 `python -m lab8.check_submission` đọc bảng này bằng máy: giữ nguyên tiêu đề `## Bảng đóng góp` và các cột. Mỗi người một dòng: commit có nội dung và ít nhất một test đã thêm hoặc sửa.
 
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
-| Phạm Hoàng Đức Minh (2A202604114) | Shape A `workflow.py`, `decision_adr.md`, review + merge PR | `1864b2b` | `tests/test_workflow_extra.py` |
+| Phạm Hoàng Đức Minh (2A202604114) | Shape A `workflow.py`, `decision_adr.md`, review + merge PR | `2a85a42` | `tests/test_workflow_extra.py` |
 | Trần Đình Nhật Minh (2A202604083) | Shape B `single.py`, kiểm step cap 8 và budget model calls | `c425b34` | `tests/test_single_extra.py` |
-| Nguyễn Văn Minh (2A202604117) | Shape C `orchestrator.py` + handoff allowlist, `reports/benchmark.json` + `reports/crash.json`, `group_report.md` | `710d8bc` | `tests/test_orchestrator_extra.py` |
+| Nguyễn Văn Minh (2A202604117) | Shape C `orchestrator.py` + handoff allowlist, `reports/benchmark.json` + `reports/crash.json`, `group_report.md` | `710d8bc`, `9e2bd15` | `tests/test_orchestrator_extra.py` |
 
 Ghi chú: mỗi thành viên commit phần của mình bằng tài khoản GitHub của mình trên nhánh riêng, rồi mở PR vào `main`.
 
 ## Cá nhân
 
-Mỗi thành viên đồng thời tạo một báo cáo riêng trong `report/team/` theo dạng `report/team/MSSV_HoTen.md`.
+Mỗi thành viên có một báo cáo riêng trong `report/team/`, đặt tên theo dạng `MSSV_HoTen.md`. Phần tóm tắt từng người nằm bên dưới.
 
 ## 2A202604114 — Phạm Hoàng Đức Minh
 
@@ -91,5 +86,5 @@ Mỗi thành viên đồng thời tạo một báo cáo riêng trong `report/tea
 
 ### Bằng chứng
 
-- Commit: `710d8bc`.
+- Commit: `710d8bc` (shape C, benchmark, crash), `9e2bd15` (test riêng).
 - Báo cáo chi tiết: `report/team/2A202604117_NguyenVanMinh.md`.

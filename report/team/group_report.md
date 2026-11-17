@@ -6,7 +6,7 @@ Tối đa 5 trang ngoài phụ lục. Số liệu lấy từ file trong `src/rep
 
 - Tên nhóm: MV
 - Thành viên: 3 người, xem `TEAM.md` (Phạm Hoàng Đức Minh — shape A; Trần Đình Nhật Minh — shape B; Nguyễn Văn Minh — shape C + benchmark)
-- Commit chốt (trùng `report/team/decision_adr.md`): `fe4b2b2`
+- Commit chốt (trùng `report/team/decision_adr.md`): `96a395c`
 - Shape chọn: `workflow`
 
 ## 2. Mục tiêu và cách tiếp cận
@@ -17,7 +17,7 @@ Bài toán là một claim hoàn phí vận chuyển: đọc ticket, tra đơn, 
 2. **Chỉ host ghi tiền**: `durability.issue_refund` kiểm approval → trần theo đơn → idempotency, rồi ghi ledger và audit `refund_committed` trong một transaction.
 3. **Trace là ranh giới bảo mật**, không phải log debug: grader quét cả `RunResult` lẫn mọi file `<run_id>*`, nên claim row và order row thô không được xuất hiện ở đâu cả.
 
-Cách chia việc: mỗi người một shape, tự viết và tự commit phần của mình; bạn phụ trách shape C kiêm benchmark/crash và báo cáo nhóm. Thứ tự làm: A (workflow) trước vì nó là baseline rẻ nhất và dễ đối chiếu nhất, rồi B (single) để thấy chi phí của vòng ReAct, rồi C (orchestrator) để thấy chi phí của việc tách investigator. Swarm có sẵn, chỉ dùng làm đối chứng.
+Cách chia việc: mỗi người một shape, tự viết và tự commit phần của mình; Nguyễn Văn Minh phụ trách shape C kiêm benchmark/crash và báo cáo nhóm. Thứ tự làm: A (workflow) trước vì nó là baseline rẻ nhất và dễ đối chiếu nhất, rồi B (single) để thấy chi phí của vòng ReAct, rồi C (orchestrator) để thấy chi phí của việc tách investigator. Swarm có sẵn, chỉ dùng làm đối chứng.
 
 ## 3. Giải pháp
 
@@ -64,7 +64,15 @@ Quyết định kiến trúc và lý do: xem `report/team/decision_adr.md`. Phi�
 
 ## 6. Tổng hợp đóng góp
 
-Chi tiết đóng góp của từng thành viên nằm trong `TEAM.md` (bảng đóng góp) và báo cáo cá nhân `report/team/MSSV_HoTen.md`.
+Mỗi thành viên viết và commit phần của mình trên tài khoản GitHub riêng, kèm test riêng:
+
+| Thành viên | Phần việc | Commit | Test thêm |
+|---|---|---|---|
+| Phạm Hoàng Đức Minh (2A202604114) | Nhóm trưởng; shape A `workflow.py`; ADR; review và merge PR | `2a85a42` | `test_workflow_extra.py` (13 test) |
+| Trần Đình Nhật Minh (2A202604083) | Shape B `single.py` (ReAct ≤ 8 bước), kiểm step cap và budget | `c425b34` | `test_single_extra.py` (24 test) |
+| Nguyễn Văn Minh (2A202604117) | Shape C `orchestrator.py` + handoff; benchmark, crash; group report; bonus B3 | `710d8bc`, `9e2bd15` | `test_orchestrator_extra.py` (9 test) |
+
+Chi tiết nằm trong bảng đóng góp của `TEAM.md` và báo cáo cá nhân `report/team/2A202604114_PhamHoangDucMinh.md`, `2A202604083_TranDinhNhatMinh.md`, `2A202604117_NguyenVanMinh.md`.
 
 ## 7. Hạn chế và hướng cải thiện
 

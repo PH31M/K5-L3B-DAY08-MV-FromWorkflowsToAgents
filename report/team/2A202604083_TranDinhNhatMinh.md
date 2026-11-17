@@ -48,17 +48,17 @@ Giới hạn **8** áp dụng cho số lần `decide` trong ReAct, bao gồm lư
 | Crash/resume/retry | 3 | Cả ba điểm crash: một refund, một audit committed sau resume và retry |
 | Ticket đối kháng | 1 | Chỉ dẫn bỏ policy và số ngày trễ bịa trong ticket không thay đổi quote hoặc rò dữ liệu |
 
-Commit kỹ thuật: chưa tạo trong phiên làm việc này; thay đổi còn trong working tree. Không ghi hash thay đổi chưa commit và không điền hash vào bảng đóng góp trước khi PR được merge, theo `TEAM.md`.
+Commit kỹ thuật: `c425b34` ("Shape B", tài khoản `trandinhnhatminh1452`), thêm `src/tests/test_single_extra.py`. Hash này có trong bảng đóng góp của `TEAM.md`.
 
 ## 4. Bằng chứng
 
 
 | Lệnh đã chạy | Kết quả |
 | --- | --- |
-| `python -m pytest -q --basetemp=.pytest_cache/single-final-host --tb=short` | **87 passed, 248 deselected**; gồm 63 test có sẵn và 24 test mới |
+| `python -m pytest -q` (chạy lại trên `main` sau khi gộp ba shape) | **122 passed, 248 deselected**; gồm 24 test mới của shape B |
 | `python -m pytest -q tests/test_single_extra.py tests/test_public_matrix.py -m 'student or not student' -o addopts= -k 'not workflow and not orchestrator and not swarm' --basetemp=.pytest_cache/single-check --tb=short` | **86 passed, 186 deselected**; 24 test riêng và 62 test ma trận public của shape B |
 | `python -m lab8.benchmark --shapes single --cases data/public_claims.jsonl --seeds 11,22,33,44,55 --out .pytest_cache/single-benchmark.json` | **70/70 trial**, pass rate **1.000**, pass^5 **1.000**, seed variance **0.000000**, cost/success hiển thị **38.17 VND mô phỏng**, mean steps **8.00** |
-| `python -m lab8.check_submission` | Shape B đúng format, **12/12** claim public seed 11; toàn repo còn **1 FAIL, 1 WARN** |
+| `python -m lab8.check_submission` | Shape B đúng format, **12/12** claim public seed 11; toàn repo **0 FAIL, 0 WARN** (chạy trên `main` sau khi gộp ba shape) |
 
 
 ## 5. Công cụ AI đã dùng
@@ -69,6 +69,6 @@ Các phép kiểm chứng đã thực hiện: chạy ma trận public của riê
 
 ## 6. Tự đánh giá
 
-Phần triển khai shape B đạt các kiểm tra public và test bổ sung nêu trên. Chưa kiểm bộ hidden, chưa commit/merge, chưa thể kết luận toàn bộ bài nhóm sẵn sàng nộp. Cost là mô phỏng, latency không được đo; kết quả MockLLM không chứng minh khả năng của model sản xuất.
+Phần triển khai shape B đạt các kiểm tra public và test bổ sung nêu trên. Chưa kiểm bộ hidden thật của giảng viên (nhóm chỉ có bản tự kiểm `src/reports/hidden_selfcheck.json`). Shape B đã được commit và gộp vào `main`; nhóm chọn shape `workflow` để nộp, shape B dùng để đối sánh. Cost là mô phỏng, latency không được đo; kết quả MockLLM không chứng minh khả năng của model sản xuất.
 
 Trước khi nộp, thành viên cần tự đọc và giải thích được: vì sao 8 lượt ReAct khác tổng model/tool call, vì sao mỗi lượt model phải tính budget, vì sao ticket không quyết định số tiền, vì sao phải gửi quote đầy đủ, và vì sao crash phải truyền ra ngoài để kiểm resume. Các quy tắc và API sử dụng lấy từ `RULES.md`, `TEAM.md`, `docs/contracts.md`, `docs/business_rules.md` và runtime/host có sẵn trong repo; không dùng code từ nguồn ngoài.

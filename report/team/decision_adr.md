@@ -4,7 +4,7 @@
 `Shape chọn` phải là đúng một trong: `workflow`, `single`, `orchestrator`, `swarm`. Đây là shape được chấm cổng hidden.
 
 - Shape chọn: workflow
-- Commit hash: fe4b2b2
+- Commit hash: 96a395c
 - Run id dẫn chứng: R-workflow-C-001-s11 (bộ trace của benchmark trong `src/reports/benchmark.json`, 280 trial)
 - Pass rate / pass^5 / seed min-max / variance: 1.000 / 1.000 / 1.000–1.000 / 0.000000
 - Cost per success (mô phỏng, VND): 28.79
@@ -20,19 +20,19 @@ Số đo lấy từ `src/reports/benchmark.json` (4 shape × 14 claim public × 
 | Shape | Pass | Pass^5 | Seed min–max | Variance | Cost/success (VND mô phỏng) | Mean steps | Mean model calls |
 |---|---:|---:|---|---:|---:|---:|---:|
 | **workflow (A)** | **1.000** | **1.000** | 1.000–1.000 | **0.000000** | **28.79** | 4.43 | 1.00 |
-| single (B) | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 38.17 | 8.00 | 4.57 |
+| single (B) | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 38.17 | 8.00 | 3.64 |
 | orchestrator (C) | 1.000 | 1.000 | 1.000–1.000 | 0.000000 | 57.33 | 5.36 | 1.93 |
 | swarm (D) | 0.986 | 0.929 | 0.929–1.000 | 0.000816 | 49.57 | 2.80 | 3.00 |
 
 Trên cùng corpus và cùng seed, ba shape nhóm viết đều đạt 1.000. Chi phí mỗi lần thành công của workflow thấp nhất (28.79), orchestrator cao nhất (57.33, gấp 1.99 lần workflow) mà **không** thêm một trial pass nào. Swarm rẻ hơn orchestrator nhưng mất một trial (C-002 ở seed 55) nên pass rate 0.986 và variance khác 0.
 
-Nguyên nhân của chênh lệch không phải chất lượng quyết định mà là **số lần gọi model và số tool call**: workflow 1 model call + 2.79 tool call, single 4.57 model call, orchestrator 1.93 model call + 5.57 tool call. Tiền và quyền ghi refund trong cả bốn shape đều do code của host quyết (`compute_compensation` + `durability.issue_refund`), nên thêm agent không mua thêm độ chính xác — chỉ mua thêm chi phí và thêm đường cho lỗi.
+Nguyên nhân của chênh lệch không phải chất lượng quyết định mà là **số lần gọi model và số tool call**: workflow 1 model call + 2.79 tool call, single 3.64 model call + 3.64 tool call, orchestrator 1.93 model call + 5.57 tool call. Tiền và quyền ghi refund trong cả bốn shape đều do code của host quyết (`compute_compensation` + `durability.issue_refund`), nên thêm agent không mua thêm độ chính xác — chỉ mua thêm chi phí và thêm đường cho lỗi.
 
 Vì vậy nhóm chọn **workflow**: kiến trúc ít tự chủ nhất mà vẫn làm hết 14/14 claim, variance bằng 0, và là shape duy nhất không có nhánh nào để model đưa dữ liệu sai vào quyết định tiền.
 
 ## Có đáng đổi lấy multi-agent không
 
-Không, trên dữ liệu này. Single và orchestrator pass bằng workflow nhưng đắt hơn 34% và 99%; swarm rẻ hơn orchestrator nhưng **kém chính xác hơn workflow** và có variance.
+Không, trên dữ liệu này. Single và orchestrator pass bằng workflow nhưng đắt hơn 33% và 99%; swarm rẻ hơn orchestrator nhưng **kém chính xác hơn workflow** và có variance.
 
 Điều kiện sẽ đảo quyết định:
 
@@ -47,7 +47,7 @@ Trace của cả ba shape ghi các event: `claim` (chỉ `claim_id`, `found`, `h
 
 Field cố ý **không** ghi: `parent_secret`, `raw_headers_json`, `phone`, `address`, `internal_note`, `item_name`, và toàn bộ text ticket. Lý do: trace là ranh giới bảo mật, grader quét `trace_path` + mọi file `<run_id>*` cùng thư mục + chính `RunResult`; claim row và order row thô chứa secret/PII nên chỉ dùng `get_claim_view`/`lookup_order` (đã lọc allowlist) rồi mới ghi.
 
-Nếu trace nằm ngoài chỗ scanner quét được, nhóm chứng minh bằng ba lớp: (1) mọi payload đi qua allowlist trong code, không qua "tóm tắt bằng LLM"; (2) test `tests/test_shapes_extra.py` khẳng định không có `CANARY_SECRET_`/`CANARY_INTERNAL_` trong trace của cả 4 shape; (3) `handoff.sanitize` ném `HandoffError` nếu còn secret/header, nên đường rò qua handoff bị chặn ở code chứ không ở quy ước.
+Nếu trace nằm ngoài chỗ scanner quét được, nhóm chứng minh bằng ba lớp: (1) mọi payload đi qua allowlist trong code, không qua "tóm tắt bằng LLM"; (2) các test `tests/test_workflow_extra.py`, `tests/test_single_extra.py`, `tests/test_orchestrator_extra.py` khẳng định không có `CANARY_SECRET_`/`CANARY_INTERNAL_` trong trace của ba shape nhóm viết; (3) `handoff.sanitize` ném `HandoffError` nếu còn secret/header, nên đường rò qua handoff bị chặn ở code chứ không ở quy ước.
 
 ## Giới hạn
 

@@ -34,7 +34,7 @@ cd src
 python -m lab8.benchmark --shapes workflow,single,orchestrator,swarm --cases data/public_claims.jsonl --seeds 11,22,33,44,55 --out reports/benchmark.json
 ```
 
-- Run id / file report: `R-workflow-C-001-s11` … (280 trial trong `src/reports/benchmark.json`), commit `710d8bc`
+- Run id / file report: `R-workflow-C-001-s11` … (280 trial trong `src/reports/benchmark.json`), commit `96a395c`
 - Kết quả so với hypothesis (đúng / sai / không kết luận được), kèm số liệu:
 
 **Đúng một phần, và đúng ở đúng chỗ dự đoán.** Shape lấy `delay_days` từ cột order (workflow, single, orchestrator): pass rate 1,000, pass^5 1,000, variance 0,000000. Shape lấy từ ticket ở seed 55 (swarm): pass rate 0,9857, pass^5 0,9286, seed min–max 0,929–1,000, variance 0,000816. Trial fail duy nhất là `C-002` seed 55, lý do `status resolved != denied` — đúng trial mà hypothesis chỉ ra.
